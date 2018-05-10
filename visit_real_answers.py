@@ -22,37 +22,7 @@ def init_browser():
 
     return browser
 
-
-def demo(browser):
-
-    themes_url = "https://www.thebump.com/real-answers/themes"
-
-    # themes_url = "file:///Users/evercx/Desktop/themes/Pregnancy%20and%20Parenting%20Message%20Boards.htm"
-
-    browser.get(themes_url)
-    print("get success")
-
-    # theme_li = browser.find_element(By.CLASS_NAME,"ra-green-btn")
-
-
-    themes_navs = browser.find_elements(By.CLASS_NAME,"ra-green-btn")
-    current_themes_index = 1
-    themes_navs[current_themes_index].click()
-    themes_list = ["pregnancy-themes", "parenting-themes", "getting-pregnant-themes"]
-    themes_element = browser.find_element(By.CLASS_NAME,themes_list[current_themes_index])
-
-    boards = themes_element.find_elements(By.CLASS_NAME,"theme")
-    print(boards)
-    boards[0].click()
-    print(boards[0].get_attribute("data-name"))
-
-    cards = browser.find_elements(By.CLASS_NAME,"topic-card")
-    href = cards[0].find_element(By.TAG_NAME,'a').get_attribute('href')
-    print(href)
-    topic_name = cards[0].find_element(By.TAG_NAME,'a').find_element(By.CLASS_NAME,'card-name').text;
-    print(topic_name)
-
-
+# 从首页获取各个主题下的各个板块下的各个话题的url
 def get_topics_urls(browser):
 
     themes_url = "https://www.thebump.com/real-answers/themes"
@@ -97,13 +67,13 @@ def get_topics_urls(browser):
                     "board_name":board_name,
                     "topic_name":topic_name,
                     "topic_url":href
-
                 })
 
     print(result)
     return result
 
 
+# 从HTML代码中找到话题id 为后续请求问题API 拼接请求地址字符串
 def get_topicid_from_html(html):
 
     id_index = html.find("gon.topic_id")
@@ -114,6 +84,7 @@ def get_topicid_from_html(html):
     return id_html[start_index+1:end_index]
 
 
+# 根据给定的话题列表  根据每个话题的网址，爬取它包含的所有问题相关信息
 def from_url_get_questions_data(topic_list):
 
     rs = requests.Session()
