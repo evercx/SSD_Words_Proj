@@ -107,7 +107,7 @@ def from_url_get_questions_data(topic_list):
         }
 
         res = rs.get(question_url.format(topic_id=topic_id), params=request_params).json()
-        print(res)
+        # print(res)
 
         request_params["page_size"] = res["total"]
 
@@ -125,16 +125,6 @@ def from_url_get_questions_data(topic_list):
             })
 
     return questions_data_list
-
-
-
-
-
-
-
-
-
-
 
 
 
@@ -163,4 +153,5 @@ if __name__ == '__main__':
 
     print(questions_data_list)
 
-    print("爬取成功")
+    conn.RealAnswers["Questions"].insert(questions_data_list)
+    print("保存成功")
