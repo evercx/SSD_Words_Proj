@@ -101,7 +101,7 @@ def from_url_get_questions_data(topic_list):
         topic_url = topic_list[i]["topic_url"]
         html_from_topic = rs.get(topic_url).text
         topic_id = get_topicid_from_html(html_from_topic)
-        print(topic_id)
+
 
         request_params = {
             "include_user": "true",
@@ -130,7 +130,7 @@ def from_url_get_questions_data(topic_list):
                 "topic_name":topic_list[i]["topic_name"],
                 "user_id":result_json_questions[j]["user"]["id"]
             })
-        print(questions_data_list)
+
 
     return questions_data_list
 
