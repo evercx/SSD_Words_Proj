@@ -8,6 +8,7 @@ from selenium.webdriver import ActionChains
 from selenium.webdriver.chrome.options import Options
 import requests
 from pymongo import MongoClient
+import csv
 
 
 # 初始化一个浏览器模拟人操作网页
@@ -95,6 +96,7 @@ def from_url_get_questions_data(topic_list):
     # print(r)
 
     questions_data_list = []
+    print("开始爬取")
     for i in range(len(topic_list)):
         topic_url = topic_list[i]["topic_url"]
         html_from_topic = rs.get(topic_url).text
@@ -121,13 +123,80 @@ def from_url_get_questions_data(topic_list):
                 "topic_url":topic_url,
                 "id":result_json_questions[j]["id"],
                 "title":result_json_questions[j]["title"],
-                "created_at":result_json_questions[j]["created_at"]
+                "created_at":result_json_questions[j]["created_at"],
+                "theme_name":topic_list[i]["theme_name"],
+                "board_name":topic_list[i]["board_name"],
+                "topic_name":topic_list[i]["topic_name"],
+                "user_id":result_json_questions[j]["user"]["id"]
             })
 
     return questions_data_list
 
+#
+# def associate_collections():
+#
+#     conn = MongoClient("121.42.236.250",27034)
+#     url_cur = conn.RealAnswers["ElementsURL"].find()
+#
+#     questions_collection = conn.RealAnswers["Questions"]
+#
+#     url_list = [ item for item in url_cur]
+#
+#     for url_item in url_list:
+#         condition = {"topic_url":url_item["topic_url"]}
+#         set_option = {'$set': {
+#             "theme_name":url_item["theme_name"],
+#             "board_name": url_item["board_name"],
+#             "topic_name": url_item["topic_name"]
+#         }}
+#
+#         result = questions_collection.update_many(condition,set_option)
+#         print(result.matched_count, result.modified_count)
+#
+#     print("关联完毕")
 
 
+def write_data_to_csv_file():
+    conn = MongoClient("121.42.236.250",27034)
+    q_cur = conn.RealAnswers["Questions"].find()
+    # question_list = [item for item in q_cur]
+
+    row_name = ["topic_name","id","title","user_id","created_at","board_name","theme_name","topic_url"]
+
+    topic_url = []
+    id = []
+    title = []
+    created_at =[]
+    theme_name = []
+    board_name = []
+    topic_name = []
+
+    i = 0
+    rows = []
+    for item in q_cur:
+        i +=1
+        current_row = []
+        current_row.append(item["topic_name"])
+        current_row.append(item["id"])
+        current_row.append(item["title"])
+        current_row.append(item["user_id"])
+        current_row.append(item["created_at"])
+        current_row.append(item["board_name"])
+        current_row.append(item["theme_name"])
+        current_row.append(item["topic_url"])
+
+        rows.append(current_row)
+
+        if i % 500 == 0:
+            print("已遍历了",i,"次")
+
+    with open("questions.csv","w",encoding="utf-8") as csvfile:
+        writer = csv.writer(csvfile)
+
+        writer.writerow(row_name)
+        writer.writerows(rows)
+
+        print("写入完毕")
 
 
 
@@ -144,14 +213,14 @@ if __name__ == '__main__':
 
     conn = MongoClient("121.42.236.250",27034)
     topic_list_cur = conn.RealAnswers["ElementsURL"].find()
-
     topic_list = [ i for i in topic_list_cur]
-
-    print(topic_list)
 
     questions_data_list = from_url_get_questions_data(topic_list)
 
-    print(questions_data_list)
-
     conn.RealAnswers["Questions"].insert(questions_data_list)
     print("保存成功")
+
+    # associate_collections()
+    # write_data_to_csv_file()
+
+
