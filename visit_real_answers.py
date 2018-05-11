@@ -101,6 +101,7 @@ def from_url_get_questions_data(topic_list):
         topic_url = topic_list[i]["topic_url"]
         html_from_topic = rs.get(topic_url).text
         topic_id = get_topicid_from_html(html_from_topic)
+        print(topic_id)
 
         request_params = {
             "include_user": "true",
@@ -129,6 +130,7 @@ def from_url_get_questions_data(topic_list):
                 "topic_name":topic_list[i]["topic_name"],
                 "user_id":result_json_questions[j]["user"]["id"]
             })
+        print(questions_data_list)
 
     return questions_data_list
 
@@ -211,14 +213,21 @@ if __name__ == '__main__':
     # conn.RealAnswers["ElementsURL"].insert(result_list)
     # print("保存成功")
 
-    conn = MongoClient("121.42.236.250",27034)
-    topic_list_cur = conn.RealAnswers["ElementsURL"].find()
-    topic_list = [ i for i in topic_list_cur]
+    try:
 
-    questions_data_list = from_url_get_questions_data(topic_list)
+        conn = MongoClient("121.42.236.250",27034)
+        topic_list_cur = conn.RealAnswers["ElementsURL"].find()
+        topic_list = [ i for i in topic_list_cur]
 
-    conn.RealAnswers["Questions"].insert(questions_data_list)
-    print("保存成功")
+        print(topic_list)
+
+        questions_data_list = from_url_get_questions_data(topic_list)
+
+        conn.RealAnswers["Questions"].insert(questions_data_list)
+        print("保存成功")
+
+    except Exception as e:
+        print(e)
 
     # associate_collections()
     # write_data_to_csv_file()
